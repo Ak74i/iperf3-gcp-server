@@ -1,0 +1,411 @@
+===============================================================================
+           iPERF3 HIGH-SPEED TESTING SERVER SETUP GUIDE
+                    Google Cloud Platform
+===============================================================================
+
+QUICK REFERENCE INFORMATION
+===============================================================================
+Source Project ID:      innate-agency-472909-t7
+Image Name:            iperf3-server-tef
+Region:                europe-west2 (London)
+Machine Type:          n2-highcpu-8
+Ports Required:        5201-5205 (TCP & UDP)
+Network Tier:          Premium (required for consistent 3Gbps testing)
+
+PREREQUISITES
+===============================================================================
+- Active Google Cloud Platform account
+- Billing enabled on your GCP project
+- Basic familiarity with command line (or willingness to copy/paste commands)
+
+
+===============================================================================
+                    OPTION 1: QUICK SETUP (RECOMMENDED)
+                     Using Shared VM Image - 5-10 Minutes
+===============================================================================
+
+STEP 1: Create Google Cloud Account & Project
+-------------------------------------------------------------------------------
+1. Go to https://cloud.google.com/
+2. Click "Get started for free" or "Console"
+3. Create a new project (or use an existing one)
+4. Enable billing for your project
+
+STEP 2: Open Cloud Shell
+-------------------------------------------------------------------------------
+1. In Google Cloud Console, click the Cloud Shell icon (>_) in top-right
+2. Wait for the terminal to load (~30 seconds)
+
+STEP 3: Create VM from Shared Image
+-------------------------------------------------------------------------------
+Copy and paste this command into Cloud Shell:
+
+gcloud compute instances create my-iperf-server \
+  --zone=europe-west2-a \
+  --image=iperf3-server-tef \
+  --image-project=innate-agency-472909-t7 \
+  --machine-type=n2-highcpu-8 \
+  --network-tier=PREMIUM \
+  --boot-disk-size=20GB \
+  --boot-disk-type=pd-ssd
+
+Press Enter. This creates your VM (takes ~2 minutes).
+
+STEP 4: Create Firewall Rules
+-------------------------------------------------------------------------------
+Allow incoming connections on iPerf3 ports:
+
+gcloud compute firewall-rules create allow-iperf3-multi \
+  --allow tcp:5201-5205,udp:5201-5205 \
+  --source-ranges 0.0.0.0/0 \
+  --direction=INGRESS \
+  --priority=1000 \
+  --description="Allow iPerf3 testing on ports 5201-5205"
+
+STEP 5: Get Your Server IP Address
+-------------------------------------------------------------------------------
+gcloud compute instances describe my-iperf-server \
+  --zone=europe-west2-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+
+You'll see an IP like 35.189.75.250 - SAVE THIS!
+
+STEP 6: Reserve Static IP (Optional but Recommended)
+-------------------------------------------------------------------------------
+To keep the same IP after stopping/starting:
+
+gcloud compute addresses create iperf-static-ip \
+  --region=europe-west2 \
+  --addresses=[YOUR_CURRENT_IP_FROM_STEP_5]
+
+✅ DONE! Your server is ready! Skip to "TESTING YOUR SERVER" section below.
+
+
+===============================================================================
+                    OPTION 2: MANUAL SETUP FROM SCRATCH
+                  Full Configuration Control - 20-30 Minutes
+===============================================================================
+
+STEP 1: Create Google Cloud Account & Project
+-------------------------------------------------------------------------------
+Same as Option 1, steps 1-2 above.
+
+STEP 2: Create a New VM Instance
+-------------------------------------------------------------------------------
+gcloud compute instances create my-iperf-server \
+  --zone=europe-west2-a \
+  --machine-type=n2-highcpu-8 \
+  --network-tier=PREMIUM \
+  --image-family=ubuntu-2204-lts \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-size=20GB \
+  --boot-disk-type=pd-ssd \
+  --tags=iperf-server
+
+STEP 3: Create Firewall Rules
+-------------------------------------------------------------------------------
+gcloud compute firewall-rules create allow-iperf3-multi \
+  --allow tcp:5201-5205,udp:5201-5205 \
+  --source-ranges 0.0.0.0/0 \
+  --target-tags=iperf-server \
+  --description="Allow iPerf3 testing on ports 5201-5205"
+
+STEP 4: SSH into Your Server
+-------------------------------------------------------------------------------
+gcloud compute ssh my-iperf-server --zone=europe-west2-a
+
+You should now be inside your VM. Rest of commands run on the VM.
+
+STEP 5: Install and Configure iPerf3
+-------------------------------------------------------------------------------
+# Update system
+sudo apt update
+
+# Install iPerf3
+sudo apt install -y iperf3
+
+# Verify installation
+iperf3 --version
+
+STEP 6: Optimize Network Settings
+-------------------------------------------------------------------------------
+# Add network optimizations
+sudo tee -a /etc/sysctl.conf > /dev/null <<EOF
+
+# iPerf3 high-speed testing optimizations
+net.core.rmem_max = 536870912
+net.core.wmem_max = 536870912
+net.ipv4.tcp_rmem = 4096 87380 536870912
+net.ipv4.tcp_wmem = 4096 65536 536870912
+net.core.netdev_max_backlog = 250000
+net.ipv4.udp_mem = 8388608 12582912 16777216
+EOF
+
+# Apply settings
+sudo sysctl -p
+
+STEP 7: Create Multi-Instance iPerf3 Service
+-------------------------------------------------------------------------------
+# Create systemd template service
+sudo nano /etc/systemd/system/iperf3@.service
+
+Paste this content (Ctrl+O to save, Ctrl+X to exit):
+
+[Unit]
+Description=iPerf3 Server on port %i
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/iperf3 -s -p %i -B 0.0.0.0 -1
+Restart=always
+RestartSec=1
+User=root
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+STEP 8: Enable and Start All iPerf3 Instances
+-------------------------------------------------------------------------------
+# Start iPerf3 on ports 5201-5205
+for port in {5201..5205}; do
+    sudo systemctl enable iperf3@$port
+    sudo systemctl start iperf3@$port
+done
+
+# Verify all instances are running
+sudo systemctl status 'iperf3@*'
+
+# Check listening ports
+sudo ss -tulpn | grep iperf3
+
+You should see 5 iPerf3 processes listening on ports 5201-5205.
+
+STEP 9: Get Your Server IP Address
+-------------------------------------------------------------------------------
+Exit SSH (type "exit") and run from Cloud Shell:
+
+gcloud compute instances describe my-iperf-server \
+  --zone=europe-west2-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+
+✅ MANUAL SETUP COMPLETE! Your server is ready!
+
+
+===============================================================================
+                         TESTING YOUR SERVER
+===============================================================================
+
+INSTALL IPERF3 CLIENT
+-------------------------------------------------------------------------------
+Platform          Installation Method
+-------------------------------------------------------------------
+Android          "iPerf3 WiFi Speed Test" from Play Store
+iOS              "iPerf - Speed Test Tool" from App Store
+Linux            sudo apt install iperf3
+macOS            brew install iperf3
+Windows          Download from https://iperf.fr/iperf-download.php
+
+TEST COMMANDS
+-------------------------------------------------------------------------------
+Replace [YOUR_SERVER_IP] with your actual server IP.
+
+1. Basic TCP test (verify connectivity):
+   iperf3 -c [YOUR_SERVER_IP] -p 5201 -t 10
+
+2. UDP Download test (3Gbps for 1 minute):
+   iperf3 -c [YOUR_SERVER_IP] -p 5201 -u -b 3G -R -t 60
+
+3. UDP Upload test:
+   iperf3 -c [YOUR_SERVER_IP] -p 5201 -u -b 3G -t 60
+
+4. Use different ports if one is busy:
+   iperf3 -c [YOUR_SERVER_IP] -p 5202 -u -b 3G -R -t 60
+   iperf3 -c [YOUR_SERVER_IP] -p 5203 -u -b 3G -R -t 60
+   ...up to port 5205
+
+COMMAND EXPLANATION
+-------------------------------------------------------------------------------
+-c          Client mode (connect to server)
+-p          Port number (5201-5205)
+-u          UDP mode
+-b 3G       Target bandwidth 3 Gbps
+-R          Reverse mode (download: data flows FROM server TO client)
+-t 60       Test duration in seconds
+
+EXPECTED RESULTS
+-------------------------------------------------------------------------------
+For successful 3Gbps UDP download test:
+
+[ ID] Interval       Transfer    Bitrate        Jitter   Lost/Total Datagrams
+[  5] 0.00-60.00 sec 21.5 GBytes 3.08 Gbits/sec 0.045 ms 1234/15789012 (0.0078%)
+
+
+===============================================================================
+                          COST MANAGEMENT
+===============================================================================
+
+ESTIMATED MONTHLY COSTS
+-------------------------------------------------------------------------------
+Item                        24/7 Operation    Test Days Only (4 days/month)
+----------------------------------------------------------------------------
+n2-highcpu-8 Compute       £135-160/month    £18/month
+Static IP (reserved)       £7/month          £7/month
+Boot Disk (20GB SSD)       £2.72/month       £2.72/month
+Egress (2.7TB/month)       £243/month        £243/month
+----------------------------------------------------------------------------
+TOTAL                      £388-413/month    £271/month
+
+COST OPTIMIZATION: Stop VM when not testing!
+-------------------------------------------------------------------------------
+# Stop VM
+gcloud compute instances stop my-iperf-server --zone=europe-west2-a
+
+# Start VM
+gcloud compute instances start my-iperf-server --zone=europe-west2-a
+
+You still pay for disk and IP, but save 85% on compute costs!
+
+FREE TIER BENEFITS
+-------------------------------------------------------------------------------
+✅ First 100 GB/month egress is FREE
+✅ Ubuntu OS license is FREE
+✅ Ingress (data TO server) is always FREE
+
+
+===============================================================================
+                          TROUBLESHOOTING
+===============================================================================
+
+PROBLEM: Cannot connect to server
+-------------------------------------------------------------------------------
+# Check firewall rules
+gcloud compute firewall-rules list | grep iperf
+
+Ensure you see a rule allowing tcp:5201-5205,udp:5201-5205
+
+PROBLEM: Server not responding after some time
+-------------------------------------------------------------------------------
+# SSH in and restart services
+gcloud compute ssh my-iperf-server --zone=europe-west2-a
+
+# Check service status
+sudo systemctl status 'iperf3@*'
+
+# Restart all instances
+for port in {5201..5205}; do
+    sudo systemctl restart iperf3@$port
+done
+
+PROBLEM: Low throughput or packet loss
+-------------------------------------------------------------------------------
+- Verify you're using Premium Network Tier (not Standard)
+- Check your mobile network connection quality
+- Try a different iPerf3 port (5202, 5203, etc.)
+- Reduce target bandwidth: -b 1G instead of -b 3G
+
+PROBLEM: "Permission denied" errors
+-------------------------------------------------------------------------------
+# Check IAM permissions
+gcloud projects get-iam-policy [YOUR_PROJECT_ID]
+
+You need at least "Compute Instance Admin" role.
+
+
+===============================================================================
+                      MAINTENANCE & MANAGEMENT
+===============================================================================
+
+VIEW SERVER LOGS
+-------------------------------------------------------------------------------
+# SSH into server
+gcloud compute ssh my-iperf-server --zone=europe-west2-a
+
+# View logs for all iPerf3 instances
+sudo journalctl -u 'iperf3@*' -f
+
+# View logs for specific port
+sudo journalctl -u iperf3@5201 -f
+
+MONITOR ACTIVE CONNECTIONS
+-------------------------------------------------------------------------------
+# Check active connections on all ports
+sudo ss -anp | grep iperf3
+
+# Check specific port
+sudo ss -anp | grep :5201
+
+UPDATE IPERF3
+-------------------------------------------------------------------------------
+sudo apt update
+sudo apt upgrade iperf3 -y
+
+# Restart services after update
+for port in {5201..5205}; do
+    sudo systemctl restart iperf3@$port
+done
+
+BACKUP YOUR CONFIGURATION
+-------------------------------------------------------------------------------
+# Create new image from your running VM
+gcloud compute instances stop my-iperf-server --zone=europe-west2-a
+
+gcloud compute images create my-iperf-backup-$(date +%Y%m%d) \
+  --source-disk=my-iperf-server \
+  --source-disk-zone=europe-west2-a \
+  --storage-location=eu
+
+gcloud compute instances start my-iperf-server --zone=europe-west2-a
+
+DELETE RESOURCES (When Finished)
+-------------------------------------------------------------------------------
+# Delete VM
+gcloud compute instances delete my-iperf-server --zone=europe-west2-a
+
+# Delete firewall rule
+gcloud compute firewall-rules delete allow-iperf3-multi
+
+# Delete static IP (if created)
+gcloud compute addresses delete iperf-static-ip --region=europe-west2
+
+
+===============================================================================
+                        ADDITIONAL RESOURCES
+===============================================================================
+
+iPerf3 Documentation:
+https://iperf.fr/iperf-doc.php
+
+Google Cloud Documentation:
+https://cloud.google.com/compute/docs
+
+Google Cloud Pricing Calculator:
+https://cloud.google.com/products/calculator
+
+Google Cloud Support:
+https://support.google.com/cloud
+
+
+===============================================================================
+                          SUMMARY CHECKLIST
+===============================================================================
+☐ Google Cloud account created
+☐ VM instance running (Option 1 or Option 2)
+☐ Firewall rules configured (ports 5201-5205)
+☐ Server IP address noted
+☐ iPerf3 client installed on test device
+☐ Test connection successful
+☐ Stop VM when not testing (to save costs)
+
+
+===============================================================================
+Questions or Issues?
+Contact the original server administrator for assistance.
+Source Project: innate-agency-472909-t7
+Image: iperf3-server-tef
+===============================================================================
+
+Last Updated: October 2025 | Version 1.0

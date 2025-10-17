@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPerf3 Server Setup Guide - Google Cloud</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a73e8;
+            border-bottom: 3px solid #1a73e8;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34a853;
+            margin-top: 30px;
+            border-left: 4px solid #34a853;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #ea4335;
+            margin-top: 20px;
+        }
+        .info-box {
+            background-color: #e8f0fe;
+            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning-box {
+            background-color: #fef7e0;
+            border-left: 4px solid #f9ab00;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background-color: #e6f4ea;
+            border-left: 4px solid #34a853;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        code {
+            background-color: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+        pre code {
+            background-color: transparent;
+            color: #aed581;
+            padding: 0;
+        }
+        .command-title {
+            color: #fbbc04;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #1a73e8;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .option-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        .option-1 {
+            background-color: #34a853;
+            color: white;
+        }
+        .option-2 {
+            background-color: #ea4335;
+            color: white;
+        }
+        ul {
+            line-height: 2;
+        }
+        .step-number {
+            display: inline-block;
+            background-color: #1a73e8;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 iPerf3 High-Speed Testing Server Setup Guide</h1>
+        
+        <div class="info-box">
+            <strong>📋 Quick Reference Information</strong><br>
+            <strong>Source Project ID:</strong> <code>innate-agency-472909-t7</code><br>
+            <strong>Image Name:</strong> <code>iperf3-server-tef</code><br>
+            <strong>Region:</strong> <code>europe-west2</code> (London)<br>
+            <strong>Machine Type:</strong> <code>n2-highcpu-8</code><br>
+            <strong>Ports Required:</strong> <code>5201-5205</code> (TCP & UDP)<br>
+            <strong>Network Tier:</strong> Premium (required for consistent 3Gbps testing)
+        </div>
+
+        <h2>📖 Overview</h2>
+        <p>This guide provides two methods to set up an iPerf3 server on Google Cloud Platform for high-speed UDP testing (up to 3Gbps). The server is configured with 5 parallel iPerf3 instances on ports 5201-5205 to prevent service interruptions during testing.</p>
+
+        <div class="warning-box">
+            <strong>⚠️ Prerequisites:</strong>
+            <ul style="margin: 10px 0;">
+                <li>Active Google Cloud Platform account</li>
+                <li>Billing enabled on your GCP project</li>
+                <li>Basic familiarity with command line (or willingness to copy/paste commands)</li>
+            </ul>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- OPTION 1 -->
+        <h2><span class="option-badge option-1">OPTION 1</span>Quick Setup - Using Shared VM Image (Recommended)</h2>
+        <p><strong>⏱️ Time Required:</strong> 5-10 minutes</p>
+        <p><strong>✅ Advantages:</strong> Fast, pre-configured, ready to use</p>
+
+        <h3><span class="step-number">1</span>Create Google Cloud Account & Project</h3>
+        <ol>
+            <li>Go to <a href="https://cloud.google.com/" target="_blank">https://cloud.google.com/</a></li>
+            <li>Click <strong>"Get started for free"</strong> or <strong>"Console"</strong></li>
+            <li>Create a new project (or use an existing one)</li>
+            <li>Enable billing for your project</li>
+        </ol>
+
+        <h3><span class="step-number">2</span>Open Cloud Shell</h3>
+        <ol>
+            <li>In the Google Cloud Console, click the <strong>Cloud Shell icon</strong> (looks like <code>>_</code>) in the top-right corner</li>
+            <li>Wait for the terminal to load (takes ~30 seconds)</li>
+        </ol>
+
+        <h3><span class="step-number">3</span>Create VM from Shared Image</h3>
+        <p>Copy and paste this command into Cloud Shell:</p>
+        
+        <div class="command-title">Create the VM instance:</div>
+        <pre><code>gcloud compute instances create my-iperf-server \
+  --zone=europe-west2-a \
+  --image=iperf3-server-tef \
+  --image-project=innate-agency-472909-t7 \
+  --machine-type=n2-highcpu-8 \
+  --network-tier=PREMIUM \
+  --boot-disk-size=20GB \
+  --boot-disk-type=pd-ssd</code></pre>
+
+        <p>Press <strong>Enter</strong>. This will create your VM (takes ~2 minutes).</p>
+
+        <h3><span class="step-number">4</span>Create Firewall Rules</h3>
+        <p>Allow incoming connections on iPerf3 ports:</p>
+
+        <div class="command-title">Create firewall rule:</div>
+        <pre><code>gcloud compute firewall-rules create allow-iperf3-multi \
+  --allow tcp:5201-5205,udp:5201-5205 \
+  --source-ranges 0.0.0.0/0 \
+  --direction=INGRESS \
+  --priority=1000 \
+  --description="Allow iPerf3 testing on ports 5201-5205"</code></pre>
+
+        <h3><span class="step-number">5</span>Get Your Server IP Address</h3>
+        
+        <div class="command-title">Get the external IP:</div>
+        <pre><code>gcloud compute instances describe my-iperf-server \
+  --zone=europe-west2-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'</code></pre>
+
+        <p>You'll see an IP address like <code>35.189.75.250</code> - <strong>save this!</strong></p>
+
+        <h3><span class="step-number">6</span>Reserve Static IP (Optional but Recommended)</h3>
+        <p>To keep the same IP address even after stopping/starting the VM:</p>
+
+        <div class="command-title">Get current IP name and reserve it:</div>
+        <pre><code># First, get the access config name
+gcloud compute instances describe my-iperf-server \
+  --zone=europe-west2-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].name)'
+
+# Reserve the IP (it will automatically use the current ephemeral IP)
+gcloud compute addresses create iperf-static-ip \
+  --region=europe-west2 \
+  --addresses=[YOUR_CURRENT_IP]</code></pre>
+
+        <div class="success-box">
+            <strong>✅ Done! Your server is ready!</strong><br>
+            Skip to the <strong>"Testing Your Server"</strong> section below.
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- OPTION 2 -->
+        <h2><span class="option-badge option-2">OPTION 2</span>Manual Setup - Configure Everything from Scratch</h2>
+        <p><strong>⏱️ Time Required:</strong> 20-30 minutes</p>
+        <p><strong>✅ Advantages:</strong> Full control, learn the setup process, customizable</p>
+
+        <h3><span class="step-number">1</span>Create Google Cloud Account & Project</h3>
+        <p>Same as Option 1, steps 1-2 above.</p>
+
+        <h3><span class="step-number">2</span>Create a New VM Instance</h3>
+
+        <div class="command-title">Create basic Ubuntu VM:</div>
+        <pre><code>gcloud compute instances create my-iperf-server \
+  --zone=europe-west2-a \
+  --machine-type=n2-highcpu-8 \
+  --network-tier=PREMIUM \
+  --image-family=ubuntu-2204-lts \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-size=20GB \
+  --boot-disk-type=pd-ssd \
+  --tags=iperf-server</code></pre>
+
+        <h3><span class="step-number">3</span>Create Firewall Rules</h3>
+        <div class="command-title">Allow iPerf3 ports and SSH:</div>
+        <pre><code># Allow iPerf3 traffic
+gcloud compute firewall-rules create allow-iperf3-multi \
+  --allow tcp:5201-5205,udp:5201-5205 \
+  --source-ranges 0.0.0.0/0 \
+  --target-tags=iperf-server \
+  --description="Allow iPerf3 testing on ports 5201-5205"
+
+# SSH should already be allowed, but verify:
+gcloud compute firewall-rules list | grep default-allow-ssh</code></pre>
+
+        <h3><span class="step-number">4</span>SSH into Your Server</h3>
+        <div class="command-title">Connect to your VM:</div>
+        <pre><code>gcloud compute ssh my-iperf-server --zone=europe-west2-a</code></pre>
+
+        <p>You should now be inside your VM. The rest of the commands run on the VM.</p>
+
+        <h3><span class="step-number">5</span>Install and Configure iPerf3</h3>
+
+        <div class="command-title">Update system and install iPerf3:</div>
+        <pre><code># Update package list
+sudo apt update
+
+# Install iPerf3
+sudo apt install -y iperf3
+
+# Verify installation
+iperf3 --version</code></pre>
+
+        <h3><span class="step-number">6</span>Optimize Network Settings</h3>
+        <div class="command-title">Increase buffer sizes for high-speed testing:</div>
+        <pre><code># Add network optimizations
+sudo tee -a /etc/sysctl.conf > /dev/null <<EOF
+
+# iPerf3 high-speed testing optimizations
+net.core.rmem_max = 536870912
+net.core.wmem_max = 536870912
+net.ipv4.tcp_rmem = 4096 87380 536870912
+net.ipv4.tcp_wmem = 4096 65536 536870912
+net.core.netdev_max_backlog = 250000
+net.ipv4.udp_mem = 8388608 12582912 16777216
+EOF
+
+# Apply settings
+sudo sysctl -p</code></pre>
+
+        <h3><span class="step-number">7</span>Create Multi-Instance iPerf3 Service</h3>
+        <p>This creates 5 parallel iPerf3 servers to prevent service interruptions.</p>
+
+        <div class="command-title">Create systemd template service:</div>
+        <pre><code>sudo nano /etc/systemd/system/iperf3@.service</code></pre>
+
+        <p>Paste this content (press Ctrl+O to save, Ctrl+X to exit):</p>
+        <pre><code>[Unit]
+Description=iPerf3 Server on port %i
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/iperf3 -s -p %i -B 0.0.0.0 -1
+Restart=always
+RestartSec=1
+User=root
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+        <h3><span class="step-number">8</span>Enable and Start All iPerf3 Instances</h3>
+        <div class="command-title">Start iPerf3 on ports 5201-5205:</div>
+        <pre><code># Enable and start instances
+for port in {5201..5205}; do
+    sudo systemctl enable iperf3@$port
+    sudo systemctl start iperf3@$port
+done
+
+# Verify all instances are running
+sudo systemctl status 'iperf3@*'
+
+# Check listening ports
+sudo ss -tulpn | grep iperf3</code></pre>
+
+        <p>You should see 5 iPerf3 processes listening on ports 5201-5205.</p>
+
+        <h3><span class="step-number">9</span>Get Your Server IP Address</h3>
+        <p>Exit SSH (type <code>exit</code>) and run from Cloud Shell:</p>
+        <pre><code>gcloud compute instances describe my-iperf-server \
+  --zone=europe-west2-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'</code></pre>
+
+        <div class="success-box">
+            <strong>✅ Manual setup complete! Your server is ready!</strong>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- TESTING SECTION -->
+        <h2>🧪 Testing Your Server</h2>
+
+        <h3>From Your Mobile Device or Computer</h3>
+        <p>Install iPerf3 on your test device:</p>
+        
+        <table>
+            <tr>
+                <th>Platform</th>
+                <th>Installation</th>
+            </tr>
+            <tr>
+                <td><strong>Android</strong></td>
+                <td>Install "iPerf3 WiFi Speed Test" from Play Store</td>
+            </tr>
+            <tr>
+                <td><strong>iOS</strong></td>
+                <td>Install "iPerf - Speed Test Tool" from App Store</td>
+            </tr>
+            <tr>
+                <td><strong>Linux</strong></td>
+                <td><code>sudo apt install iperf3</code></td>
+            </tr>
+            <tr>
+                <td><strong>macOS</strong></td>
+                <td><code>brew install iperf3</code></td>
+            </tr>
+            <tr>
+                <td><strong>Windows</strong></td>
+                <td>Download from <a href="https://iperf.fr/iperf-download.php" target="_blank">iperf.fr</a></td>
+            </tr>
+        </table>
+
+        <h3>Test Commands</h3>
+        <p>Replace <code>[YOUR_SERVER_IP]</code> with your actual server IP address.</p>
+
+        <div class="command-title">1. Basic TCP test (verify connectivity):</div>
+        <pre><code>iperf3 -c [YOUR_SERVER_IP] -p 5201 -t 10</code></pre>
+
+        <div class="command-title">2. UDP Download test (3Gbps for 1 minute):</div>
+        <pre><code>iperf3 -c [YOUR_SERVER_IP] -p 5201 -u -b 3G -R -t 60</code></pre>
+
+        <div class="command-title">3. UDP Upload test:</div>
+        <pre><code>iperf3 -c [YOUR_SERVER_IP] -p 5201 -u -b 3G -t 60</code></pre>
+
+        <div class="command-title">4. Use different ports if one is busy:</div>
+        <pre><code>iperf3 -c [YOUR_SERVER_IP] -p 5202 -u -b 3G -R -t 60
+iperf3 -c [YOUR_SERVER_IP] -p 5203 -u -b 3G -R -t 60
+# ... etc up to 5205</code></pre>
+
+        <div class="info-box">
+            <strong>💡 Command Explanation:</strong><br>
+            <code>-c</code> : Client mode (connect to server)<br>
+            <code>-p</code> : Port number (5201-5205)<br>
+            <code>-u</code> : UDP mode<br>
+            <code>-b 3G</code> : Target bandwidth 3 Gbps<br>
+            <code>-R</code> : Reverse mode (download test - data flows FROM server TO client)<br>
+            <code>-t 60</code> : Test duration in seconds
+        </div>
+
+        <h3>Expected Results</h3>
+        <p>For a successful 3Gbps UDP download test, you should see output similar to:</p>
+        <pre><code>[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-60.00  sec  21.5 GBytes  3.08 Gbits/sec  0.045 ms  1234/15789012 (0.0078%)
+
+Server output:
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-60.04  sec  21.5 GBytes  3.08 Gbits/sec  0.045 ms  1234/15789012 (0.0078%)</code></pre>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- COST MANAGEMENT -->
+        <h2>💰 Cost Management</h2>
+
+        <h3>Estimated Monthly Costs</h3>
+        <table>
+            <tr>
+                <th>Item</th>
+                <th>Cost (24/7 operation)</th>
+                <th>Cost (Test days only)</th>
+            </tr>
+            <tr>
+                <td>n2-highcpu-8 Compute</td>
+                <td>~£135-160/month</td>
+                <td>~£18/month (4 days/month)</td>
+            </tr>
+            <tr>
+                <td>Static IP (reserved)</td>
+                <td>£7/month</td>
+                <td>£7/month</td>
+            </tr>
+            <tr>
+                <td>Boot Disk (20GB SSD)</td>
+                <td>£2.72/month</td>
+                <td>£2.72/month</td>
+            </tr>
+            <tr>
+                <td>Egress (2.7TB/month)</td>
+                <td>£243/month</td>
+                <td>£243/month</td>
+            </tr>
+            <tr>
+                <td><strong>Total</strong></td>
+                <td><strong>~£388-413/month</strong></td>
+                <td><strong>~£271/month</strong></td>
+            </tr>
+        </table>
+
+        <div class="warning-box">
+            <strong>⚠️ Cost Optimization:</strong> Stop your VM when not testing!<br>
+            <code>gcloud compute instances stop my-iperf-server --zone=europe-west2-a</code><br>
+            <code>gcloud compute instances start my-iperf-server --zone=europe-west2-a</code><br>
+            You still pay for disk and IP, but save 85% on compute costs!
+        </div>
+
+        <h3>Free Tier Benefits</h3>
+        <ul>
+            <li>✅ First 100 GB/month egress is FREE</li>
+            <li>✅ Ubuntu OS license is FREE</li>
+            <li>✅ Ingress (data TO server) is always FREE</li>
+        </ul>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- TROUBLESHOOTING -->
+        <h2>🔧 Troubleshooting</h2>
+
+        <h3>Problem: Cannot connect to server</h3>
+        <div class="command-title">Check firewall rules:</div>
+        <pre><code>gcloud compute firewall-rules list | grep iperf</code></pre>
+        <p>Ensure you see a rule allowing <code>tcp:5201-5205,udp:5201-5205</code></p>
+
+        <h3>Problem: Server not responding after some time</h3>
+        <div class="command-title">SSH in and restart services:</div>
+        <pre><code>gcloud compute ssh my-iperf-server --zone=europe-west2-a
+
+# Check service status
+sudo systemctl status 'iperf3@*'
+
+# Restart all instances
+for port in {5201..5205}; do
+    sudo systemctl restart iperf3@$port
+done</code></pre>
+
+        <h3>Problem: Low throughput or packet loss</h3>
+        <ul>
+            <li>Verify you're using <strong>Premium Network Tier</strong> (not Standard)</li>
+            <li>Check your mobile network connection quality</li>
+            <li>Try a different iPerf3 port (5202, 5203, etc.)</li>
+            <li>Reduce target bandwidth: <code>-b 1G</code> instead of <code>-b 3G</code></li>
+        </ul>
+
+        <h3>Problem: "Permission denied" errors</h3>
+        <div class="command-title">Ensure you have proper IAM permissions:</div>
+        <pre><code>gcloud projects get-iam-policy [YOUR_PROJECT_ID]</code></pre>
+        <p>You need at least <code>Compute Instance Admin</code> role.</p>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- MAINTENANCE -->
+        <h2>🛠️ Maintenance & Management</h2>
+
+        <h3>View Server Logs</h3>
+        <pre><code># SSH into server
+gcloud compute ssh my-iperf-server --zone=europe-west2-a
+
+# View logs for all iPerf3 instances
+sudo journalctl -u 'iperf3@*' -f
+
+# View logs for specific port
+sudo journalctl -u iperf3@5201 -f</code></pre>
+
+        <h3>Monitor Active Connections</h3>
+        <pre><code># Check active connections on all ports
+sudo ss -anp | grep iperf3
+
+# Check specific port
+sudo ss -anp | grep :5201</code></pre>
+
+        <h3>Update iPerf3</h3>
+        <pre><code>sudo apt update
+sudo apt upgrade iperf3 -y
+
+# Restart services after update
+for port in {5201..5205}; do
+    sudo systemctl restart iperf3@$port
+done</code></pre>
+
+        <h3>Backup Your Configuration</h3>
+        <pre><code># Create a new image from your running VM
+gcloud compute instances stop my-iperf-server --zone=europe-west2-a
+
+gcloud compute images create my-iperf-backup-$(date +%Y%m%d) \
+  --source-disk=my-iperf-server \
+  --source-disk-zone=europe-west2-a \
+  --storage-location=eu
+
+gcloud compute instances start my-iperf-server --zone=europe-west2-a</code></pre>
+
+        <h3>Delete Resources (When Finished)</h3>
+        <pre><code># Delete VM
+gcloud compute instances delete my-iperf-server --zone=europe-west2-a
+
+# Delete firewall rule
+gcloud compute firewall-rules delete allow-iperf3-multi
+
+# Delete static IP (if created)
+gcloud compute addresses delete iperf-static-ip --region=europe-west2</code></pre>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- ADDITIONAL INFO -->
+        <h2>📚 Additional Resources</h2>
+
+        <ul>
+            <li><strong>iPerf3 Documentation:</strong> <a href="https://iperf.fr/iperf-doc.php" target="_blank">https://iperf.fr/iperf-doc.php</a></li>
+            <li><strong>Google Cloud Documentation:</strong> <a href="https://cloud.google.com/compute/docs" target="_blank">https://cloud.google.com/compute/docs</a></li>
+            <li><strong>Google Cloud Pricing Calculator:</strong> <a href="https://cloud.google.com/products/calculator" target="_blank">https://cloud.google.com/products/calculator</a></li>
+            <li><strong>Google Cloud Support:</strong> <a href="https://support.google.com/cloud" target="_blank">https://support.google.com/cloud</a></li>
+        </ul>
+
+        <hr style="margin: 40px 0;">
+
+        <div class="success-box">
+            <h3>✅ Summary Checklist</h3>
+            <ul style="margin: 10px 0;">
+                <li>☐ Google Cloud account created</li>
+                <li>☐ VM instance running (Option 1 or Option 2)</li>
+                <li>☐ Firewall rules configured (ports 5201-5205)</li>
+                <li>☐ Server IP address noted</li>
+                <li>☐ iPerf3 client installed on test device</li>
+                <li>☐ Test connection successful</li>
+                <li>☐ Stop VM when not testing (to save costs)</li>
+            </ul>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <div class="info-box">
+            <strong>📧 Questions or Issues?</strong><br>
+            Contact the original server administrator for assistance.<br>
+            Source Project: <code>innate-agency-472909-t7</code><br>
+            Image: <code>iperf3-server-tef</code>
+        </div>
+
+        <p style="text-align: center; color: #666; margin-top: 40px; font-size: 0.9em;">
+            Last Updated: October 2025 | Version 1.0
+        </p>
+    </div>
+</body>
+</html>
