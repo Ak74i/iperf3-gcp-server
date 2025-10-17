@@ -1,0 +1,382 @@
+# Example Terraform Variables for Multi-Cloud iPerf3 Deployment
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# ============================================================================
+# PROVIDER SELECTION (REQUIRED)
+# ============================================================================
+
+# Choose your cloud provider: "gcp" or "aws"
+cloud_provider = "aws"  # Change to "gcp" for Google Cloud Platform
+
+# ============================================================================
+# GOOGLE CLOUD PLATFORM CONFIGURATION
+# ============================================================================
+
+# Required for GCP deployment
+# gcp_project_id = "my-gcp-project-id"  # Your GCP project ID
+# gcp_region = "europe-west2"           # London
+# gcp_zone = "europe-west2-a"
+# gcp_machine_type = "n1-standard-4"    # Recommended for 3+ Gbps
+# gcp_ssh_key = "ssh-rsa AAAAB3NzaC1yc2E..."  # Your SSH public key
+
+# ============================================================================
+# AMAZON WEB SERVICES CONFIGURATION  
+# ============================================================================
+
+# Required for AWS deployment
+aws_region = "eu-west-2"           # London
+aws_instance_type = "c5n.xlarge"   # Recommended for 3+ Gbps
+aws_key_name = "my-aws-key-pair"   # Your EC2 key pair name
+
+# ============================================================================
+# GENERAL CONFIGURATION
+# ============================================================================
+
+environment = "test"
+name_prefix = "iperf3"
+server_name = "iPerf3-Test-Server"
+
+# ============================================================================
+# COST OPTIMIZATION
+# ============================================================================
+
+# Use spot/preemptible instances for 60-70% cost savings
+use_preemptible_spot = false  # Set to true for cost savings
+
+# AWS-specific spot configuration
+aws_spot_max_price = "0.065"  # Maximum price for spot instance
+
+# ============================================================================
+# NETWORK CONFIGURATION
+# ============================================================================
+
+# AWS VPC settings (ignored for GCP)
+aws_create_vpc = true
+aws_vpc_cidr = "10.0.0.0/16"
+aws_public_subnet_cidr = "10.0.1.0/24"
+
+# Security settings
+ssh_cidr_blocks = ["0.0.0.0/0"]  # WARNING: Allows SSH from anywhere!
+# For better security, use your specific IP:
+# ssh_cidr_blocks = ["1.2.3.4/32"]  # Replace with your public IP
+
+allow_ssh_from_anywhere = true  # Set to false for better security
+
+# ============================================================================
+# OPTIONAL FEATURES
+# ============================================================================
+
+use_elastic_ip = false       # Static IP (AWS only, additional cost)
+enable_monitoring = true     # Cloud monitoring and logging
+enable_auto_stop = false     # Auto-stop when idle (cost protection)
+disk_size_gb = 20           # Root disk size
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+
+enable_enhanced_networking = true
+enable_placement_group = false  # For multiple instances (AWS only)
+
+# iPerf3 configuration
+iperf_ports = ["5201", "5202", "5203", "5204", "5205"]
+
+# ============================================================================
+# MONITORING AND LOGGING
+# ============================================================================
+
+log_retention_days = 7
+max_monthly_cost_alert = 100  # USD
+
+# ============================================================================
+# TAGS AND LABELS
+# ============================================================================
+
+additional_tags = {
+  Owner = "YourName"
+  Purpose = "Network Testing"
+  Department = "IT"
+  CostCenter = "12345"
+  Environment = "Test"
+}
+
+# ============================================================================
+# COMMON DEPLOYMENT SCENARIOS
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# SCENARIO 1: BASIC TESTING (Lowest Cost)
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "us-east-1"
+# aws_instance_type = "c5n.large"
+# aws_key_name = "my-key"
+# use_preemptible_spot = true
+# aws_spot_max_price = "0.035"
+
+# ----------------------------------------------------------------------------
+# SCENARIO 2: HIGH PERFORMANCE TESTING  
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "eu-west-2"
+# aws_instance_type = "c5n.2xlarge"
+# aws_key_name = "my-key"
+# use_elastic_ip = true
+# enable_monitoring = true
+
+# ----------------------------------------------------------------------------
+# SCENARIO 3: GOOGLE CLOUD DEPLOYMENT
+# ----------------------------------------------------------------------------
+# cloud_provider = "gcp"
+# gcp_project_id = "my-project-123456"
+# gcp_region = "europe-west2"
+# gcp_zone = "europe-west2-a"
+# gcp_machine_type = "n1-standard-4"
+# use_preemptible_spot = true
+
+# ----------------------------------------------------------------------------
+# SCENARIO 4: PRODUCTION/LONG-TERM DEPLOYMENT
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "us-west-2"
+# aws_instance_type = "c5n.xlarge"
+# aws_key_name = "prod-key"
+# use_elastic_ip = true
+# enable_monitoring = true
+# enable_auto_stop = true
+# log_retention_days = 30
+# ssh_cidr_blocks = ["10.0.0.0/8"]  # Corporate network only
+
+# ----------------------------------------------------------------------------
+# SCENARIO 5: SECURITY-FOCUSED DEPLOYMENT
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "eu-central-1"
+# aws_instance_type = "c5n.xlarge"
+# aws_key_name = "secure-key"
+# allow_ssh_from_anywhere = false
+# ssh_cidr_blocks = ["203.0.113.0/24"]  # Your office IP range
+# aws_enable_instance_metadata_v2 = true
+
+# ============================================================================
+# REGIONAL CONFIGURATIONS
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# AWS REGIONS
+# ----------------------------------------------------------------------------
+
+# US East (N. Virginia) - Lowest costs, highest availability
+# aws_region = "us-east-1"
+# aws_instance_type = "c5n.xlarge"
+
+# EU West (London) - Good for Europe
+# aws_region = "eu-west-2"
+# aws_instance_type = "c5n.xlarge"
+
+# EU Central (Frankfurt) - Good for Central Europe
+# aws_region = "eu-central-1"
+# aws_instance_type = "c5n.xlarge"
+
+# Asia Pacific (Tokyo) - Good for Asia
+# aws_region = "ap-northeast-1"
+# aws_instance_type = "c5n.xlarge"
+
+# ----------------------------------------------------------------------------
+# GCP REGIONS
+# ----------------------------------------------------------------------------
+
+# Europe West 2 (London) - Good for Europe
+# gcp_region = "europe-west2"
+# gcp_zone = "europe-west2-a"
+# gcp_machine_type = "n1-standard-4"
+
+# US Central 1 (Iowa) - Lowest costs
+# gcp_region = "us-central1"
+# gcp_zone = "us-central1-a"
+# gcp_machine_type = "n1-standard-4"
+
+# Asia Northeast 1 (Tokyo) - Good for Asia
+# gcp_region = "asia-northeast1"
+# gcp_zone = "asia-northeast1-a"
+# gcp_machine_type = "n1-standard-4"
+
+# ============================================================================
+# INSTANCE TYPE RECOMMENDATIONS
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# AWS INSTANCE TYPES FOR 3+ GBPS TESTING
+# ----------------------------------------------------------------------------
+
+# c5n.large    - 2 vCPU,  5.25GB RAM, Up to 10 Gbps  (~$0.11/hr)
+# c5n.xlarge   - 4 vCPU, 10.50GB RAM, Up to 25 Gbps  (~$0.22/hr) ⭐ RECOMMENDED
+# c5n.2xlarge  - 8 vCPU, 21.00GB RAM, Up to 25 Gbps  (~$0.43/hr)
+# m5n.xlarge   - 4 vCPU, 16.00GB RAM, Up to 25 Gbps  (~$0.24/hr)
+
+# ----------------------------------------------------------------------------
+# GCP MACHINE TYPES FOR 3+ GBPS TESTING
+# ----------------------------------------------------------------------------
+
+# n1-standard-2 - 2 vCPU,  7.5GB RAM, Up to 10 Gbps  (~$0.10/hr)
+# n1-standard-4 - 4 vCPU, 15.0GB RAM, Up to 10 Gbps  (~$0.19/hr) ⭐ RECOMMENDED  
+# n1-standard-8 - 8 vCPU, 30.0GB RAM, Up to 16 Gbps  (~$0.38/hr)
+# c2-standard-4 - 4 vCPU, 16.0GB RAM, Up to 10 Gbps  (~$0.20/hr)
+
+# ============================================================================
+# COST ESTIMATES (On-Demand, US regions)
+# ============================================================================
+
+# AWS COSTS:
+# c5n.large:   ~$78/month  (24/7), ~$2.60/day (8 hours), ~$0.88/day (testing 4 hours)
+# c5n.xlarge:  ~$156/month (24/7), ~$5.20/day (8 hours), ~$1.76/day (testing 4 hours)
+# c5n.2xlarge: ~$312/month (24/7), ~$10.40/day (8 hours), ~$3.52/day (testing 4 hours)
+
+# GCP COSTS:
+# n1-standard-2: ~$68/month  (24/7), ~$2.28/day (8 hours), ~$0.76/day (testing 4 hours)
+# n1-standard-4: ~$137/month (24/7), ~$4.56/day (8 hours), ~$1.52/day (testing 4 hours)
+# n1-standard-8: ~$274/month (24/7), ~$9.12/day (8 hours), ~$3.04/day (testing 4 hours)
+
+# SPOT/PREEMPTIBLE SAVINGS:
+# AWS Spot: 60-70% savings (e.g., c5n.xlarge: ~$0.065/hr instead of ~$0.22/hr)
+# GCP Preemptible: ~70% savings (e.g., n1-standard-4: ~$0.057/hr instead of ~$0.19/hr)
+
+# ============================================================================
+# QUICK START EXAMPLES
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# MINIMAL AWS CONFIGURATION (just change these 3 lines)
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "us-east-1"
+# aws_key_name = "your-key-name"
+
+# ----------------------------------------------------------------------------
+# MINIMAL GCP CONFIGURATION (just change these 4 lines)
+# ----------------------------------------------------------------------------
+# cloud_provider = "gcp" 
+# gcp_project_id = "your-project-id"
+# gcp_region = "us-central1"
+# gcp_zone = "us-central1-a"
+
+# ----------------------------------------------------------------------------
+# COST-OPTIMIZED CONFIGURATION (AWS Spot)
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "us-east-1"
+# aws_key_name = "your-key-name"
+# aws_instance_type = "c5n.large"
+# use_preemptible_spot = true
+# aws_spot_max_price = "0.035"
+
+# ----------------------------------------------------------------------------
+# HIGH-PERFORMANCE CONFIGURATION (AWS)
+# ----------------------------------------------------------------------------
+# cloud_provider = "aws"
+# aws_region = "eu-west-2"
+# aws_key_name = "your-key-name"
+# aws_instance_type = "c5n.2xlarge"
+# use_elastic_ip = true
+# enable_monitoring = true
+
+# ============================================================================
+# TESTING COMMANDS (After Deployment)
+# ============================================================================
+
+# Get server IP:
+# terraform output public_ip
+
+# Basic download test:
+# iperf3 -c $(terraform output -raw public_ip) -p 5201 -R -t 30
+
+# High-performance test with parallel connections:
+# iperf3 -c $(terraform output -raw public_ip) -p 5201 -R -t 30 -P 4
+
+# UDP test:
+# iperf3 -c $(terraform output -raw public_ip) -p 5201 -u -b 3G -R -t 30
+
+# Multi-port test:
+# for port in {5201..5205}; do iperf3 -c $(terraform output -raw public_ip) -p $port -t 30 & done; wait
+
+# ============================================================================
+# MANAGEMENT COMMANDS (After Deployment)
+# ============================================================================
+
+# SSH to server:
+# terraform output -raw ssh_command
+
+# Stop instance (save money):
+# terraform output -raw cloud_management_commands | jq -r '.stop_instance'
+
+# Start instance:
+# terraform output -raw cloud_management_commands | jq -r '.start_instance'
+
+# View deployment summary:
+# terraform output deployment_summary
+
+# Check cost estimation:
+# terraform output cost_estimation
+
+# Destroy everything:
+# terraform destroy
+
+# ============================================================================
+# ADVANCED CONFIGURATION OPTIONS
+# ============================================================================
+
+# Development/Testing
+# debug_mode = true
+# test_mode = true
+
+# Backup and disaster recovery
+# enable_backup = true
+# backup_retention_days = 7
+
+# Enhanced monitoring (AWS)
+# aws_enable_detailed_monitoring = true
+
+# IP forwarding (GCP)
+# gcp_enable_ip_forwarding = false
+
+# Instance metadata security (AWS)
+# aws_enable_instance_metadata_v2 = true
+
+# ============================================================================
+# NOTES AND RECOMMENDATIONS
+# ============================================================================
+
+# 1. ALWAYS set your cloud provider first: cloud_provider = "gcp" or "aws"
+# 2. For AWS: Ensure aws_key_name exists in your target region
+# 3. For GCP: Ensure gcp_project_id is correct and you have access
+# 4. Use spot/preemptible instances for testing to save 60-70% on costs
+# 5. Remember to stop instances when not testing to avoid charges
+# 6. For production use, restrict SSH access with specific CIDR blocks
+# 7. Enable monitoring for production deployments
+# 8. Consider using Elastic IP (AWS) for long-term deployments
+# 9. Test from multiple geographic locations for comprehensive results
+# 10. Monitor cloud billing dashboards to avoid unexpected costs
+
+# ============================================================================
+# TROUBLESHOOTING
+# ============================================================================
+
+# If deployment fails:
+# 1. Check cloud provider authentication: aws configure / gcloud auth login
+# 2. Verify required variables are set correctly
+# 3. Ensure key pairs exist in the target region
+# 4. Check quota limits in your cloud account
+# 5. Review Terraform error messages for specific issues
+
+# If performance is lower than expected:
+# 1. Try different instance types with higher network performance
+# 2. Test from multiple geographic locations
+# 3. Use parallel connections (-P 4)
+# 4. Check client-side network limitations
+# 5. Verify enhanced networking is enabled
+
+# For SSH connection issues:
+# 1. Check security groups/firewall rules allow SSH from your IP
+# 2. Verify SSH key pair is correctly configured
+# 3. Wait 2-3 minutes after deployment for services to start
+# 4. Use cloud console to verify instance is running

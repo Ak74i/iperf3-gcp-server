@@ -1,0 +1,133 @@
+# Example Terraform Variables for iPerf3 AWS Deployment
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# REQUIRED: AWS Configuration
+aws_region = "eu-west-2"  # London - change to your preferred region
+key_name   = "my-key-pair"  # REQUIRED: Your EC2 key pair name
+
+# Server Configuration
+server_name   = "iPerf3-Test-Server"
+instance_type = "c5n.xlarge"  # Recommended for 3+ Gbps testing
+
+# Cost Optimization
+use_spot_instance = false  # Set to true for 60-70% cost savings
+spot_max_price    = "0.065"  # Maximum hourly price for spot instance
+
+# Network Configuration
+create_vpc = true  # Set to false to use existing VPC
+# If using existing VPC, uncomment and set:
+# existing_vpc_id    = "vpc-xxxxxxxxx"
+# existing_subnet_id = "subnet-xxxxxxxxx"
+
+# Security
+ssh_cidr_blocks = ["0.0.0.0/0"]  # WARNING: This allows SSH from anywhere!
+# For better security, use your specific IP:
+# ssh_cidr_blocks = ["YOUR_PUBLIC_IP/32"]
+
+# Optional Features
+use_elastic_ip    = false  # Set to true for static IP (additional cost)
+enable_monitoring = true   # CloudWatch monitoring
+enable_auto_stop  = false  # Auto-stop when idle (cost protection)
+
+# Performance Tuning
+enable_enhanced_networking = true
+enable_placement_group     = false  # For multiple instances
+
+# Monitoring and Logging
+log_retention_days = 7
+# sns_topic_arn = "arn:aws:sns:region:account:topic"  # For alerts
+
+# Tags
+additional_tags = {
+  Owner       = "YourName"
+  Purpose     = "Network Testing"
+  Department  = "IT"
+  CostCenter  = "12345"
+}
+
+# ===============================================
+# COMMON DEPLOYMENT SCENARIOS
+# ===============================================
+
+# 1. BASIC TESTING (Lowest Cost)
+# aws_region = "us-east-1"
+# instance_type = "c5n.large"
+# use_spot_instance = true
+# spot_max_price = "0.035"
+
+# 2. HIGH PERFORMANCE TESTING
+# instance_type = "c5n.2xlarge"
+# use_elastic_ip = true
+# enable_enhanced_networking = true
+
+# 3. PRODUCTION/LONG-TERM DEPLOYMENT
+# use_elastic_ip = true
+# enable_monitoring = true
+# enable_auto_stop = true
+# log_retention_days = 30
+
+# 4. SECURITY-FOCUSED DEPLOYMENT
+# ssh_cidr_blocks = ["YOUR_OFFICE_IP/32"]
+# enable_instance_metadata_v2 = true
+
+# ===============================================
+# REGIONAL CONFIGURATIONS
+# ===============================================
+
+# London (EU-West-2) - Good for Europe
+# aws_region = "eu-west-2"
+# instance_type = "c5n.xlarge"
+
+# N. Virginia (US-East-1) - Lowest costs
+# aws_region = "us-east-1"
+# instance_type = "c5n.xlarge"
+
+# Frankfurt (EU-Central-1) - Good for Central Europe
+# aws_region = "eu-central-1"
+# instance_type = "c5n.xlarge"
+
+# Tokyo (AP-Northeast-1) - Good for Asia
+# aws_region = "ap-northeast-1"
+# instance_type = "c5n.xlarge"
+
+# ===============================================
+# INSTANCE TYPE RECOMMENDATIONS
+# ===============================================
+
+# For 3+ Gbps Testing:
+# c5n.large    - Up to 10 Gbps  (~$0.11/hr) - Budget option
+# c5n.xlarge   - Up to 25 Gbps  (~$0.22/hr) - ⭐ RECOMMENDED
+# c5n.2xlarge  - Up to 25 Gbps  (~$0.43/hr) - High performance
+# m5n.xlarge   - Up to 25 Gbps  (~$0.24/hr) - More balanced
+
+# ===============================================
+# COST ESTIMATES (US-East-1, On-Demand)
+# ===============================================
+
+# c5n.large:   ~$78/month  (24/7), ~$2.60/day (8 hours)
+# c5n.xlarge:  ~$156/month (24/7), ~$5.20/day (8 hours)
+# c5n.2xlarge: ~$312/month (24/7), ~$10.40/day (8 hours)
+
+# Spot instances can reduce costs by 60-70%
+
+# ===============================================
+# QUICK START EXAMPLES
+# ===============================================
+
+# Minimal configuration (just change these):
+# aws_region = "us-east-1"
+# key_name   = "your-key-name"
+
+# Cost-optimized configuration:
+# aws_region = "us-east-1"
+# key_name   = "your-key-name"
+# instance_type = "c5n.large"
+# use_spot_instance = true
+# spot_max_price = "0.035"
+
+# High-performance configuration:
+# aws_region = "eu-west-2"
+# key_name   = "your-key-name"
+# instance_type = "c5n.2xlarge"
+# use_elastic_ip = true
+# enable_monitoring = true
