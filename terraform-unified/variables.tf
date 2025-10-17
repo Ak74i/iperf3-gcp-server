@@ -75,7 +75,7 @@ variable "use_elastic_ip" {
 }
 
 # ============================================================================
-# GOOGLE CLOUD PLATFORM CONFIGURATION
+# GOOGLE CLOUD PLATFORM CONFIGURATION - UPDATED FOR EUROPE COMPATIBILITY
 # ============================================================================
 
 variable "gcp_project_id" {
@@ -107,17 +107,19 @@ variable "gcp_zone" {
 }
 
 variable "gcp_machine_type" {
-  description = "GCP machine type optimized for network performance"
+  description = "GCP machine type optimized for network performance (Europe-compatible)"
   type        = string
-  default     = "n1-standard-4"
+  default     = "n2-standard-4"  # UPDATED: Europe-compatible default
   
   validation {
     condition = contains([
-      "n1-standard-2", "n1-standard-4", "n1-standard-8",
-      "n2-standard-2", "n2-standard-4", "n2-standard-8",
-      "c2-standard-4", "c2-standard-8", "c2-standard-16"
+      "e2-standard-4", "e2-standard-8",
+      "n2-standard-2", "n2-standard-4", "n2-standard-8", "n2-standard-16",
+      "n2-highcpu-4", "n2-highcpu-8", "n2-highcpu-16",
+      "c2-standard-4", "c2-standard-8", "c2-standard-16",
+      "c2d-standard-4", "c2d-standard-8", "c2d-standard-16"
     ], var.gcp_machine_type)
-    error_message = "Machine type must be a high-performance networking instance type."
+    error_message = "Machine type must be a Europe-compatible high-performance instance type. Use n2/e2/c2/c2d series instead of n1 series for Europe regions."
   }
 }
 
@@ -330,7 +332,7 @@ variable "enable_placement_group" {
 }
 
 # ============================================================================
-# VALIDATION AND COMPUTED VALUES
+# VALIDATION AND COMPUTED VALUES - UPDATED FOR EUROPE COMPATIBILITY
 # ============================================================================
 
 locals {
@@ -348,16 +350,24 @@ locals {
     startswith(var.gcp_zone, var.gcp_region) ? true : tobool("GCP zone must be within the specified region")
   ) : true
   
-  # Cost estimation per provider
+  # Updated cost estimation for Europe-compatible machine types
   estimated_hourly_cost_gcp = {
-    "n1-standard-2" = 0.095
-    "n1-standard-4" = 0.190
-    "n1-standard-8" = 0.380
-    "n2-standard-2" = 0.097
-    "n2-standard-4" = 0.194
-    "n2-standard-8" = 0.388
-    "c2-standard-4" = 0.199
-    "c2-standard-8" = 0.398
+    # Europe-compatible machine types with updated pricing
+    "e2-standard-4"   = 0.134
+    "e2-standard-8"   = 0.268
+    "n2-standard-2"   = 0.097
+    "n2-standard-4"   = 0.194
+    "n2-standard-8"   = 0.388
+    "n2-standard-16"  = 0.776
+    "n2-highcpu-4"   = 0.142
+    "n2-highcpu-8"   = 0.284
+    "n2-highcpu-16"  = 0.568
+    "c2-standard-4"   = 0.199
+    "c2-standard-8"   = 0.398
+    "c2-standard-16"  = 0.796
+    "c2d-standard-4"  = 0.168
+    "c2d-standard-8"  = 0.336
+    "c2d-standard-16" = 0.672
   }
   
   estimated_hourly_cost_aws = {
@@ -372,18 +382,25 @@ locals {
   }
   
   # Get estimated cost based on provider and instance type
-  estimated_cost = var.cloud_provider == "gcp" ? lookup(local.estimated_hourly_cost_gcp, var.gcp_machine_type, 0.15) : lookup(local.estimated_hourly_cost_aws, var.aws_instance_type, 0.20)
+  estimated_cost = var.cloud_provider == "gcp" ? lookup(local.estimated_hourly_cost_gcp, var.gcp_machine_type, 0.20) : lookup(local.estimated_hourly_cost_aws, var.aws_instance_type, 0.20)
   
-  # Network performance expectations
+  # Updated network performance expectations for Europe-compatible types
   network_performance_gcp = {
-    "n1-standard-2" = "Up to 10 Gbps"
-    "n1-standard-4" = "Up to 10 Gbps"
-    "n1-standard-8" = "Up to 16 Gbps"
-    "n2-standard-2" = "Up to 10 Gbps"
-    "n2-standard-4" = "Up to 10 Gbps"
-    "n2-standard-8" = "Up to 16 Gbps"
-    "c2-standard-4" = "Up to 10 Gbps"
-    "c2-standard-8" = "Up to 16 Gbps"
+    "e2-standard-4"   = "Up to 4 Gbps"
+    "e2-standard-8"   = "Up to 8 Gbps"
+    "n2-standard-2"   = "Up to 10 Gbps"
+    "n2-standard-4"   = "Up to 10 Gbps"
+    "n2-standard-8"   = "Up to 16 Gbps"
+    "n2-standard-16"  = "Up to 32 Gbps"
+    "n2-highcpu-4"   = "Up to 10 Gbps"
+    "n2-highcpu-8"   = "Up to 16 Gbps"
+    "n2-highcpu-16"  = "Up to 32 Gbps"
+    "c2-standard-4"   = "Up to 10 Gbps"
+    "c2-standard-8"   = "Up to 16 Gbps"
+    "c2-standard-16"  = "Up to 32 Gbps"
+    "c2d-standard-4"  = "Up to 10 Gbps"
+    "c2d-standard-8"  = "Up to 16 Gbps"
+    "c2d-standard-16" = "Up to 32 Gbps"
   }
   
   network_performance_aws = {

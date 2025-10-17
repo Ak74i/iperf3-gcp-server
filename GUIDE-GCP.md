@@ -9,7 +9,7 @@ Complete guide for deploying an iPerf3 high-speed test server (3+ Gbps capable) 
 
 **One-command deployment:**
 ```bash
-./deploy-gcp.sh --project my-gcp-project --region europe-west2
+./deploy-gcp.sh --project my-gcp-project --region europe-west2 --machine-type n2-highcpu-8
 ```
 
 ##  Prerequisites ##
@@ -21,11 +21,12 @@ Complete guide for deploying an iPerf3 high-speed test server (3+ Gbps capable) 
 ### GCP Account Setup ##
 1. **Create GCP Account** - [Sign up here](https://cloud.google.com/free)
 2. **Create Project** - [GCP Console](https://console.cloud.google.com/)
-3. **Enable APIs:**
+3. **Enable Billing** - Required for Compute Engine
+4. **Enable APIs:**
    ```bash
    gcloud services enable compute.googleapis.com
    ```
-4. **Authenticate:**
+5. **Authenticate:**
    ```bash
    gcloud auth login
    gcloud config set project YOUR-PROJECT-ID
@@ -36,11 +37,14 @@ Complete guide for deploying an iPerf3 high-speed test server (3+ Gbps capable) 
 ### Option 1: One-Click Script (Recommended for Testing)
 
 ```bash
-# Basic deployment
-./deploy-gcp.sh --project my-project --region europe-west2
+# Basic deployment (recommended)
+./deploy-gcp.sh --project my-project --region europe-west2 --machine-type n2-highcpu-8
 
-# Custom deployment
-./deploy-gcp.sh --project my-project --region europe-west2 --machine-type n1-standard-4 --preemptible
+# Budget deployment
+./deploy-gcp.sh --project my-project --region europe-west2 --machine-type n2-standard-4 --preemptible
+
+# High-performance deployment
+./deploy-gcp.sh --project my-project --region europe-west2 --machine-type n2-standard-8
 ```
 
 ### Option 2: Terraform (Recommended for Production)
@@ -55,6 +59,7 @@ cloud_provider = "gcp"
 gcp_project_id = "my-gcp-project"
 gcp_region = "europe-west2"
 gcp_zone = "europe-west2-a"
+gcp_machine_type = "n2-highcpu-8"
 
 # Deploy
 terraform init
@@ -62,18 +67,20 @@ terraform plan
 terraform apply
 ```
 
-## ⚙️ Instance Types & Performance
+## ⚙️ Instance Types & Performance (Updated for Europe Compatibility)
 
-### Recommended Machine Types for 3+ Gbps (pricing is in USD$)
+### Recommended Machine Types for 3+ Gbps (pricing is in EUR for Europe regions)
 
-| Machine Type      | vCPUs | RAM   | Network Performance | Cost/Hour* |
-|-------------------|-------|-------|---------------------|------------|
-| **n1-standard-2** | 2     | 7.5GB | Up to 10 Gbps       | ~$0.10     |
-| **n1-standard-4** | 4     | 15GB  | Up to 10 Gbps       | ~$0.19     |
-| **n2-standard-4** | 4     | 16GB  | Up to 10 Gbps       | ~$0.19     |
-| **c2-standard-4** | 4     | 16GB  | Up to 10 Gbps       | ~$0.20     |
+| Machine Type      | vCPUs | RAM   | Network Performance | Cost/Hour* | Best For         |
+|-------------------|-------|-------|---------------------|------------|------------------|
+| **e2-standard-4** | 4     | 16GB  | Up to 4 Gbps        | ~€0.13     | Budget testing   |
+| **n2-standard-4** | 4     | 16GB  | Up to 10 Gbps       | ~€0.17     | Balanced testing |
+| **n2-highcpu-8**  | 8     | 8GB   | Up to 16 Gbps       | ~€0.28     | **Recommended**  |
+| **n2-standard-8** | 8     | 32GB  | Up to 16 Gbps       | ~€0.35     | High performance |
 
-*Pricing for europe-west2 region
+*Pricing for europe-west2 region. Preemptible instances ~70% cheaper.
+
+**Note:** n1-standard-2 and n1-standard-4 are not available in Europe regions. Use n2 series instead.
 
 ## 🧪 Testing Your Server
 
@@ -106,7 +113,7 @@ iperf3 -c $EXTERNAL_IP -p 5201 -t 30 -P 4
 
 **UDP Test (High bandwidth):**
 ```bash
-iperf3 -c $EXTERNAL_IP -p 5201 -u -b 3G -R -t 30
+iperf3 -c $EXTERNAL_IP -p 5201 -u -b 5G -R -t 30
 ```
 
 **Multi-Port Test:**
@@ -117,41 +124,47 @@ done
 wait
 ```
 
-## 💰 Cost Management
+## 💰 Cost Management (Updated Pricing)
 
-### Pricing (europe-west2) (pricing is in USD$)
+### Pricing (europe-west2 - London) (pricing is in EUR)
 
-| Machine Type      | On-Demand/Hour | Preemptible/Hour | Monthly (24/7) |
-|-------------------|----------------|------------------|----------------|
-| **n1-standard-2** | $0.095         | $0.020           | ~$68           |
-| **n1-standard-4** | $0.190         | $0.040           | ~$137          |
-| **n2-standard-4** | $0.194         | $0.041           | ~$140          |
+| Machine Type      | On-Demand/Hour | Preemptible/Hour | Monthly (24/7) | Monthly (8h/day) |
+|-------------------|----------------|------------------|----------------|------------------|
+| **e2-standard-4** | €0.13          | €0.04            | ~€94           | ~€31             |
+| **n2-standard-4** | €0.17          | €0.05            | ~€122          | ~€41             |
+| **n2-highcpu-8**  | €0.28          | €0.08            | ~€202          | ~€67             |
+| **n2-standard-8** | €0.35          | €0.11            | ~€252          | ~€84             |
 
 ### Cost Optimization
 
 **1. Use Preemptible Instances (70% savings):**
 ```bash
-./deploy-gcp.sh --project my-project --region europe-west2 --preemptible
+./deploy-gcp.sh --project my-project --region europe-west2 --machine-type n2-highcpu-8 --preemptible
 ```
 
-**2. Stop instance when not testing:**
+**2. Choose Cheapest Europe Region:**
+```bash
+./deploy-gcp.sh --project my-project --region europe-north1 --machine-type n2-highcpu-8  # Finland - cheapest
+```
+
+**3. Stop instance when not testing:**
 ```bash
 gcloud compute instances stop iperf3-server --zone=europe-west2-a
 ```
 
-**3. Start when needed:**
+**4. Start when needed:**
 ```bash
 gcloud compute instances start iperf3-server --zone=europe-west2-a
 ```
 
-**4. Delete when finished:**
+**5. Delete when finished:**
 ```bash
 gcloud compute instances delete iperf3-server --zone=europe-west2-a
 ```
 
 ## ⚠️ Important Cost Warning
 
-> **💸 COST ALERT**: Running 24/7 can cost $70-140+ per month! Always stop instances when not testing.
+> **💸 COST ALERT**: Running 24/7 can cost €94-252+ per month! Always stop instances when not testing.
 
 ## 🔧 Manual Setup (Advanced)
 
@@ -169,8 +182,8 @@ gcloud compute firewall-rules create iperf3-server-firewall \
 ```bash
 gcloud compute instances create iperf3-server \
     --zone=europe-west2-a \
-    --machine-type=n1-standard-4 \
-    --image-family=ubuntu-2204-lts \
+    --machine-type=n2-highcpu-8 \
+    --image-family=ubuntu-2004-lts \
     --image-project=ubuntu-os-cloud \
     --boot-disk-size=20GB \
     --boot-disk-type=pd-standard \
@@ -202,7 +215,16 @@ gcloud auth login
 gcloud services enable compute.googleapis.com
 ```
 
-**3. Can't connect to server:**
+**3. Machine type not available:**
+```bash
+# Try different machine type
+./deploy-gcp.sh --project my-project --region europe-west2 --machine-type n2-standard-4
+
+# Or try different region
+./deploy-gcp.sh --project my-project --region europe-west1 --machine-type n2-highcpu-8
+```
+
+**4. Can't connect to server:**
 ```bash
 # Check firewall rules
 gcloud compute firewall-rules list --filter="name:iperf3"
@@ -211,35 +233,38 @@ gcloud compute firewall-rules list --filter="name:iperf3"
 gcloud compute instances list --filter="name:iperf3-server"
 ```
 
-**4. Low performance:**
+**5. Low performance:**
 ```bash
 # Try a larger machine type
 gcloud compute instances set-machine-type iperf3-server \
-    --machine-type n1-standard-8 \
+    --machine-type n2-standard-8 \
     --zone europe-west2-a
 ```
 
-## 📊 Expected Performance
+## 📊 Expected Performance (Updated for New Machine Types)
 
 ### Network Throughput
 
-| Machine Type  | Expected TCP Download | Expected TCP Upload | Expected UDP  |
-|---------------|-----------------------|---------------------|---------------|
-| n1-standard-2 | 3-6 Gbps              | 1-3 Gbps            | Up to 8 Gbps  |
-| n1-standard-4 | 5-8 Gbps              | 2-5 Gbps            | Up to 10 Gbps |
-| n2-standard-4 | 5-8 Gbps              | 2-5 Gbps            | Up to 10 Gbps |
+| Machine Type    | Expected TCP Download | Expected TCP Upload | Expected UDP  |
+|-----------------|-----------------------|---------------------|---------------|
+| e2-standard-4   | 2-4 Gbps              | 1-2 Gbps            | Up to 4 Gbps  |
+| n2-standard-4   | 5-10 Gbps             | 2-5 Gbps            | Up to 10 Gbps |
+| n2-highcpu-8 ⭐ | 8-16 Gbps             | 4-8 Gbps            | Up to 16 Gbps |
+| n2-standard-8   | 8-16 Gbps             | 4-8 Gbps            | Up to 16 Gbps |
 
 ### Real-World Results
-- **TCP Download**: 5-8 Gbps typical (depends on client connection)
-- **TCP Upload**: 2-5 Gbps typical (depends on client connection)  
-- **UDP**: Up to 10 Gbps (server capable)
+- **TCP Download**: 8-16 Gbps typical with n2-highcpu-8 (depends on client connection)
+- **TCP Upload**: 4-8 Gbps typical with n2-highcpu-8 (depends on client connection)  
+- **UDP**: Up to 16 Gbps (server capable with n2-highcpu-8)
 - **Latency**: Sub-millisecond within same region
 
-## 🌍 Regional Options
+## 🌍 Regional Options (Updated)
 
 ### Europe Regions
-- **europe-west2** (London) - Good for UK/Europe
-- **europe-west1** (Belgium) - Good for Europe
+- **europe-west2** (London) - Best for UK/Western Europe
+- **europe-west1** (Belgium) - Good for Central Europe
+- **europe-west3** (Frankfurt) - Good for Germany/Central Europe
+- **europe-north1** (Finland) - **Cheapest Europe region**
 - **europe-central2** (Warsaw) - Good for Eastern Europe
 
 ### US Regions (Lower Cost)
@@ -272,8 +297,8 @@ gcloud compute instances set-machine-type iperf3-server \
 
 **Quick Commands Summary:**
 ```bash
-# Deploy
-./deploy-gcp.sh --project YOUR-PROJECT --region europe-west2
+# Deploy (updated with correct machine type)
+./deploy-gcp.sh --project YOUR-PROJECT --region europe-west2 --machine-type n2-highcpu-8
 
 # Test  
 iperf3 -c YOUR-SERVER-IP -p 5201 -R -t 30 -P 4

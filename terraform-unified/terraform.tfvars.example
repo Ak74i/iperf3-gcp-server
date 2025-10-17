@@ -9,14 +9,14 @@
 cloud_provider = "aws"  # Change to "gcp" for Google Cloud Platform
 
 # ============================================================================
-# GOOGLE CLOUD PLATFORM CONFIGURATION
+# GOOGLE CLOUD PLATFORM CONFIGURATION - UPDATED FOR EUROPE COMPATIBILITY
 # ============================================================================
 
 # Required for GCP deployment
 # gcp_project_id = "my-gcp-project-id"  # Your GCP project ID
 # gcp_region = "europe-west2"           # London
 # gcp_zone = "europe-west2-a"
-# gcp_machine_type = "n1-standard-4"    # Recommended for 3+ Gbps
+# gcp_machine_type = "n2-standard-4"    # UPDATED: Europe-compatible, recommended for 3+ Gbps
 # gcp_ssh_key = "ssh-rsa AAAAB3NzaC1yc2E..."  # Your SSH public key
 
 # ============================================================================
@@ -125,13 +125,13 @@ additional_tags = {
 # enable_monitoring = true
 
 # ----------------------------------------------------------------------------
-# SCENARIO 3: GOOGLE CLOUD DEPLOYMENT
+# SCENARIO 3: GOOGLE CLOUD DEPLOYMENT - UPDATED FOR EUROPE
 # ----------------------------------------------------------------------------
 # cloud_provider = "gcp"
 # gcp_project_id = "my-project-123456"
 # gcp_region = "europe-west2"
 # gcp_zone = "europe-west2-a"
-# gcp_machine_type = "n1-standard-4"
+# gcp_machine_type = "n2-standard-4"  # UPDATED: Europe-compatible
 # use_preemptible_spot = true
 
 # ----------------------------------------------------------------------------
@@ -183,23 +183,33 @@ additional_tags = {
 # aws_instance_type = "c5n.xlarge"
 
 # ----------------------------------------------------------------------------
-# GCP REGIONS
+# GCP REGIONS - UPDATED FOR EUROPE COMPATIBILITY
 # ----------------------------------------------------------------------------
 
 # Europe West 2 (London) - Good for Europe
 # gcp_region = "europe-west2"
 # gcp_zone = "europe-west2-a"
-# gcp_machine_type = "n1-standard-4"
+# gcp_machine_type = "n2-standard-4"  # UPDATED: Europe-compatible
+
+# Europe West 1 (Belgium) - Central Europe
+# gcp_region = "europe-west1"
+# gcp_zone = "europe-west1-b"
+# gcp_machine_type = "n2-standard-4"  # UPDATED: Europe-compatible
+
+# Europe North 1 (Finland) - Cheapest Europe region
+# gcp_region = "europe-north1"
+# gcp_zone = "europe-north1-a"
+# gcp_machine_type = "n2-standard-4"  # UPDATED: Europe-compatible
 
 # US Central 1 (Iowa) - Lowest costs
 # gcp_region = "us-central1"
 # gcp_zone = "us-central1-a"
-# gcp_machine_type = "n1-standard-4"
+# gcp_machine_type = "n2-standard-4"  # UPDATED: Available globally
 
 # Asia Northeast 1 (Tokyo) - Good for Asia
 # gcp_region = "asia-northeast1"
 # gcp_zone = "asia-northeast1-a"
-# gcp_machine_type = "n1-standard-4"
+# gcp_machine_type = "n2-standard-4"  # UPDATED: Available globally
 
 # ============================================================================
 # INSTANCE TYPE RECOMMENDATIONS
@@ -215,31 +225,37 @@ additional_tags = {
 # m5n.xlarge   - 4 vCPU, 16.00GB RAM, Up to 25 Gbps  (~$0.24/hr)
 
 # ----------------------------------------------------------------------------
-# GCP MACHINE TYPES FOR 3+ GBPS TESTING
+# GCP MACHINE TYPES FOR 3+ GBPS TESTING - UPDATED FOR EUROPE COMPATIBILITY
 # ----------------------------------------------------------------------------
 
-# n1-standard-2 - 2 vCPU,  7.5GB RAM, Up to 10 Gbps  (~$0.10/hr)
-# n1-standard-4 - 4 vCPU, 15.0GB RAM, Up to 10 Gbps  (~$0.19/hr) ⭐ RECOMMENDED  
-# n1-standard-8 - 8 vCPU, 30.0GB RAM, Up to 16 Gbps  (~$0.38/hr)
-# c2-standard-4 - 4 vCPU, 16.0GB RAM, Up to 10 Gbps  (~$0.20/hr)
+# e2-standard-4  - 4 vCPU, 16.0GB RAM, Up to 4 Gbps   (~€0.13/hr) 💰 BUDGET
+# n2-standard-4  - 4 vCPU, 16.0GB RAM, Up to 10 Gbps  (~€0.17/hr) ⭐ RECOMMENDED  
+# n2-highcpu-8   - 8 vCPU,  8.0GB RAM, Up to 16 Gbps  (~€0.28/hr) 🚀 HIGH PERFORMANCE
+# n2-standard-8  - 8 vCPU, 32.0GB RAM, Up to 16 Gbps  (~€0.35/hr) 💪 MAXIMUM
+
+# DEPRECATED (Not available in Europe regions):
+# n1-standard-2 - DEPRECATED: Use e2-standard-4 or n2-standard-4 instead
+# n1-standard-4 - DEPRECATED: Use n2-standard-4 instead
+# n1-standard-8 - DEPRECATED: Use n2-standard-8 or n2-highcpu-8 instead
 
 # ============================================================================
-# COST ESTIMATES (On-Demand, US regions)
+# COST ESTIMATES - UPDATED FOR EUROPE REGIONS
 # ============================================================================
 
-# AWS COSTS:
+# AWS COSTS (EU regions):
 # c5n.large:   ~$78/month  (24/7), ~$2.60/day (8 hours), ~$0.88/day (testing 4 hours)
-# c5n.xlarge:  ~$156/month (24/7), ~$5.20/day (8 hours), ~$1.76/day (testing 4 hours)
-# c5n.2xlarge: ~$312/month (24/7), ~$10.40/day (8 hours), ~$3.52/day (testing 4 hours)
+# c5n.xlarge:  ~$173/month (24/7), ~$5.76/day (8 hours), ~$1.92/day (testing 4 hours)
+# c5n.2xlarge: ~$346/month (24/7), ~$11.52/day (8 hours), ~$3.84/day (testing 4 hours)
 
-# GCP COSTS:
-# n1-standard-2: ~$68/month  (24/7), ~$2.28/day (8 hours), ~$0.76/day (testing 4 hours)
-# n1-standard-4: ~$137/month (24/7), ~$4.56/day (8 hours), ~$1.52/day (testing 4 hours)
-# n1-standard-8: ~$274/month (24/7), ~$9.12/day (8 hours), ~$3.04/day (testing 4 hours)
+# GCP COSTS (Europe regions - EUR pricing):
+# e2-standard-4:  ~€94/month  (24/7), ~€3.12/day (8 hours), ~€1.04/day (testing 4 hours)
+# n2-standard-4:  ~€122/month (24/7), ~€4.08/day (8 hours), ~€1.36/day (testing 4 hours)
+# n2-highcpu-8:   ~€202/month (24/7), ~€6.72/day (8 hours), ~€2.24/day (testing 4 hours)
+# n2-standard-8:  ~€252/month (24/7), ~€8.40/day (8 hours), ~€2.80/day (testing 4 hours)
 
 # SPOT/PREEMPTIBLE SAVINGS:
-# AWS Spot: 60-70% savings (e.g., c5n.xlarge: ~$0.065/hr instead of ~$0.22/hr)
-# GCP Preemptible: ~70% savings (e.g., n1-standard-4: ~$0.057/hr instead of ~$0.19/hr)
+# AWS Spot: 60-70% savings (e.g., c5n.xlarge: ~$0.065/hr instead of ~$0.24/hr)
+# GCP Preemptible: ~70% savings (e.g., n2-standard-4: ~€0.05/hr instead of ~€0.17/hr)
 
 # ============================================================================
 # QUICK START EXAMPLES
@@ -249,26 +265,36 @@ additional_tags = {
 # MINIMAL AWS CONFIGURATION (just change these 3 lines)
 # ----------------------------------------------------------------------------
 # cloud_provider = "aws"
-# aws_region = "us-east-1"
+# aws_region = "eu-west-2"  # London for Europe
 # aws_key_name = "your-key-name"
 
 # ----------------------------------------------------------------------------
-# MINIMAL GCP CONFIGURATION (just change these 4 lines)
+# MINIMAL GCP CONFIGURATION - UPDATED (just change these 4 lines)
 # ----------------------------------------------------------------------------
 # cloud_provider = "gcp" 
 # gcp_project_id = "your-project-id"
-# gcp_region = "us-central1"
-# gcp_zone = "us-central1-a"
+# gcp_region = "europe-west2"     # London for Europe
+# gcp_zone = "europe-west2-a"
 
 # ----------------------------------------------------------------------------
 # COST-OPTIMIZED CONFIGURATION (AWS Spot)
 # ----------------------------------------------------------------------------
 # cloud_provider = "aws"
-# aws_region = "us-east-1"
+# aws_region = "eu-west-2"        # London for Europe
 # aws_key_name = "your-key-name"
 # aws_instance_type = "c5n.large"
 # use_preemptible_spot = true
 # aws_spot_max_price = "0.035"
+
+# ----------------------------------------------------------------------------
+# COST-OPTIMIZED CONFIGURATION (GCP Preemptible) - UPDATED
+# ----------------------------------------------------------------------------
+# cloud_provider = "gcp"
+# gcp_project_id = "your-project-id"
+# gcp_region = "europe-west2"     # London for Europe
+# gcp_zone = "europe-west2-a"
+# gcp_machine_type = "n2-standard-4"  # Europe-compatible
+# use_preemptible_spot = true
 
 # ----------------------------------------------------------------------------
 # HIGH-PERFORMANCE CONFIGURATION (AWS)
@@ -278,6 +304,16 @@ additional_tags = {
 # aws_key_name = "your-key-name"
 # aws_instance_type = "c5n.2xlarge"
 # use_elastic_ip = true
+# enable_monitoring = true
+
+# ----------------------------------------------------------------------------
+# HIGH-PERFORMANCE CONFIGURATION (GCP) - UPDATED
+# ----------------------------------------------------------------------------
+# cloud_provider = "gcp"
+# gcp_project_id = "your-project-id"
+# gcp_region = "europe-west2"
+# gcp_zone = "europe-west2-a"
+# gcp_machine_type = "n2-highcpu-8"   # High performance, Europe-compatible
 # enable_monitoring = true
 
 # ============================================================================
@@ -343,22 +379,27 @@ additional_tags = {
 # aws_enable_instance_metadata_v2 = true
 
 # ============================================================================
-# NOTES AND RECOMMENDATIONS
+# NOTES AND RECOMMENDATIONS - UPDATED FOR EUROPE
 # ============================================================================
 
 # 1. ALWAYS set your cloud provider first: cloud_provider = "gcp" or "aws"
 # 2. For AWS: Ensure aws_key_name exists in your target region
 # 3. For GCP: Ensure gcp_project_id is correct and you have access
-# 4. Use spot/preemptible instances for testing to save 60-70% on costs
-# 5. Remember to stop instances when not testing to avoid charges
-# 6. For production use, restrict SSH access with specific CIDR blocks
-# 7. Enable monitoring for production deployments
-# 8. Consider using Elastic IP (AWS) for long-term deployments
-# 9. Test from multiple geographic locations for comprehensive results
-# 10. Monitor cloud billing dashboards to avoid unexpected costs
+# 4. IMPORTANT: Use Europe-compatible machine types for GCP Europe regions:
+#    - Use n2-standard-4 instead of n1-standard-4
+#    - Use n2-highcpu-8 instead of n1-standard-8
+#    - Use e2-standard-4 for budget deployments
+# 5. Use spot/preemptible instances for testing to save 60-70% on costs
+# 6. Remember to stop instances when not testing to avoid charges
+# 7. For production use, restrict SSH access with specific CIDR blocks
+# 8. Enable monitoring for production deployments
+# 9. Consider using Elastic IP (AWS) for long-term deployments
+# 10. Test from multiple geographic locations for comprehensive results
+# 11. Monitor cloud billing dashboards to avoid unexpected costs
+# 12. europe-north1 (Finland) is the cheapest GCP Europe region
 
 # ============================================================================
-# TROUBLESHOOTING
+# TROUBLESHOOTING - UPDATED
 # ============================================================================
 
 # If deployment fails:
@@ -367,6 +408,7 @@ additional_tags = {
 # 3. Ensure key pairs exist in the target region
 # 4. Check quota limits in your cloud account
 # 5. Review Terraform error messages for specific issues
+# 6. FOR GCP EUROPE: Ensure you're using n2/e2/c2 machine types, not n1 types
 
 # If performance is lower than expected:
 # 1. Try different instance types with higher network performance
@@ -374,9 +416,15 @@ additional_tags = {
 # 3. Use parallel connections (-P 4)
 # 4. Check client-side network limitations
 # 5. Verify enhanced networking is enabled
+# 6. For GCP: Consider n2-highcpu-8 or n2-standard-8 for maximum performance
 
 # For SSH connection issues:
 # 1. Check security groups/firewall rules allow SSH from your IP
 # 2. Verify SSH key pair is correctly configured
 # 3. Wait 2-3 minutes after deployment for services to start
 # 4. Use cloud console to verify instance is running
+
+# Machine type errors in GCP Europe regions:
+# 1. Error "machine type not found" → Use n2-standard-4 instead of n1-standard-4
+# 2. Error "does not support machine type n1-standard-*" → Switch to n2/e2 series
+# 3. Check machine type availability: gcloud compute machine-types list --filter="zone:your-zone"

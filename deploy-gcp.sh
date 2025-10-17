@@ -10,7 +10,7 @@ set -euo pipefail
 DEFAULT_PROJECT=""
 DEFAULT_REGION="europe-west2"
 DEFAULT_ZONE="europe-west2-a"
-DEFAULT_MACHINE_TYPE="n1-standard-4"
+DEFAULT_MACHINE_TYPE="n2-standard-4"
 DEFAULT_SERVER_NAME="iperf3-server"
 DEFAULT_PREEMPTIBLE="false"
 
@@ -59,21 +59,21 @@ OPTIONS:
     -h, --help                   Show this help message
     -v, --version                Show version
 
-RECOMMENDED MACHINE TYPES:
-    n1-standard-2   - 2 vCPU,  7.5GB RAM, Up to 10 Gbps  (~\$0.10/hr)
-    n1-standard-4   - 4 vCPU, 15.0GB RAM, Up to 10 Gbps  (~\$0.19/hr) ⭐ RECOMMENDED
-    n2-standard-4   - 4 vCPU, 16.0GB RAM, Up to 10 Gbps  (~\$0.19/hr)
-    c2-standard-4   - 4 vCPU, 16.0GB RAM, Up to 10 Gbps  (~\$0.20/hr)
+RECOMMENDED MACHINE TYPES (Europe Compatible):
+    e2-standard-4   - 4 vCPU, 16.0GB RAM, Up to 4 Gbps   (~€0.13/hr)
+    n2-standard-4   - 4 vCPU, 16.0GB RAM, Up to 10 Gbps  (~€0.17/hr) ⭐ RECOMMENDED
+    n2-highcpu-8    - 8 vCPU,  8.0GB RAM, Up to 16 Gbps  (~€0.28/hr)
+    n2-standard-8   - 8 vCPU, 32.0GB RAM, Up to 16 Gbps  (~€0.35/hr)
 
 EXAMPLES:
     # Basic deployment
     $0 --project my-gcp-project --region europe-west2
 
     # Cost-optimized with preemptible instance
-    $0 --project my-project --region us-central1 --preemptible
+    $0 --project my-project --region europe-west1 --preemptible
 
     # High-performance setup
-    $0 --project my-project --machine-type n1-standard-8
+    $0 --project my-project --machine-type n2-highcpu-8
 
 PREREQUISITES:
     - gcloud CLI installed and configured
