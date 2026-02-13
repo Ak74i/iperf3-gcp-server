@@ -78,7 +78,7 @@ cp terraform.tfvars.example terraform.tfvars
 terraform init && terraform apply
 ```
 
-## 📊 Cloud Provider Comparison (Updated)
+## Cloud Provider Comparison (Updated)
 
 | Feature                  | Google Cloud              | Amazon Web Services         |
 |--------------------------|---------------------------|-----------------------------|
@@ -111,11 +111,11 @@ terraform init && terraform apply
 - **GCP**: australia-southeast1 (Sydney), australia-southeast2 (Melbourne)
 - **AWS**: ap-southeast-2 (Sydney), ap-southeast-4 (Melbourne), ap-southeast-6 (Auckland)
 
-## 💰 Cost Warning
+## Cost Warning
 
 ⚠️ **IMPORTANT**: Cloud instances cost money! Always stop instances when not testing to avoid charges.
 
-## 🤝 Support
+## Support
 
 - **Issues**: Create GitHub issue
 - **Documentation**: See `GUIDE-GCP.md` or `GUIDE-AWS.md`
