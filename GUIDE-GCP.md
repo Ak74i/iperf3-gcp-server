@@ -67,7 +67,7 @@ terraform plan
 terraform apply
 ```
 
-## ⚙️ Instance Types & Performance (Updated for Europe Compatibility)
+##  Instance Types & Performance (Updated for Europe Compatibility)
 
 ### Recommended Machine Types for 3+ Gbps (pricing is in EUR for Europe regions)
 
@@ -82,7 +82,7 @@ terraform apply
 
 **Note:** n1-standard-2 and n1-standard-4 are not available in Europe regions. Use n2 series instead.
 
-## 🧪 Testing Your Server
+## Testing Your Server
 
 ### Get Server Information
 
@@ -124,7 +124,7 @@ done
 wait
 ```
 
-## 💰 Cost Management (Updated Pricing)
+## Cost Management (Updated Pricing)
 
 ### Pricing (europe-west2 - London) (pricing is in EUR)
 
@@ -162,11 +162,11 @@ gcloud compute instances start iperf3-server --zone=europe-west2-a
 gcloud compute instances delete iperf3-server --zone=europe-west2-a
 ```
 
-## ⚠️ Important Cost Warning
+## Important Cost Warning
 
-> **💸 COST ALERT**: Running 24/7 can cost €94-252+ per month! Always stop instances when not testing.
+> ** COST ALERT**: Running 24/7 can cost €94-252+ per month! Always stop instances when not testing.
 
-## 🔧 Manual Setup (Advanced)
+##  Manual Setup (Advanced)
 
 ### 1. Create Firewall Rules
 
@@ -197,7 +197,7 @@ gcloud compute instances create iperf3-server \
 --preemptible
 ```
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -241,7 +241,7 @@ gcloud compute instances set-machine-type iperf3-server \
     --zone europe-west2-a
 ```
 
-## 📊 Expected Performance (Updated for New Machine Types)
+## Expected Performance (Updated for New Machine Types)
 
 ### Network Throughput
 
@@ -258,7 +258,7 @@ gcloud compute instances set-machine-type iperf3-server \
 - **UDP**: Up to 16 Gbps (server capable with n2-highcpu-8)
 - **Latency**: Sub-millisecond within same region
 
-## 🌍 Regional Options (Updated)
+## Regional Options (Updated)
 
 ### Europe Regions
 - **europe-west2** (London) - Best for UK/Western Europe
@@ -279,13 +279,13 @@ gcloud compute instances set-machine-type iperf3-server \
 - **australia-southeast1** (Sydney) - Good for Australia & New Zealand
 - **australia-southeast2** (Melbourne) - Good for Australia & southern regions
 
-## 📚 Additional Resources
+## Additional Resources
 
 - **GCP Compute Engine Documentation**: [docs.cloud.google.com](https://cloud.google.com/compute/docs)
 - **iPerf3 Official Documentation**: [iperf.fr](https://iperf.fr/iperf-doc.php)
 - **GCP Pricing Calculator**: [cloud.google.com/calculator](https://cloud.google.com/calculator)
 
-## 🤝 Support
+## Support
 
 - **Deployment Issues**: Check this guide or create GitHub issue
 - **Performance Questions**: See troubleshooting section
@@ -293,7 +293,7 @@ gcloud compute instances set-machine-type iperf3-server \
 
 ---
 
-**🎯 Ready to test high-speed networks on Google Cloud Platform!**
+** Ready to test high-speed networks on Google Cloud Platform!**
 
 **Quick Commands Summary:**
 ```bash
